@@ -31,7 +31,7 @@ INSTANCE_NAME=$(hostname)
 STATE="healthy"
 while true; do
   if [[ "$ZONE" = "$(GetMetadata $PROJECT_METADATA_URL/failed_zone)" ]] && \
-     [[ "$INSTANCE_NAME" =~ "$(GetMetadata $PROJECT_METADATA_URL/failed_instance_names)" ]]; then
+     [[ "$INSTANCE_NAME" = *"$(GetMetadata $PROJECT_METADATA_URL/failed_instance_names)"* ]]; then
     if [[ "$STATE" = "healthy" ]]; then
       STATE="failure"
       # Do something to simulate failure here.
