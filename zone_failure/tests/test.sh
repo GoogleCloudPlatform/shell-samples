@@ -24,6 +24,7 @@ ZONE="us-central1-a"
 
 echo "Cleanup after previous runs"
 gcloud --project="$PROJECT" compute project-info remove-metadata --keys failed_zone,failed_instance_names
+gcloud --project="$PROJECT" compute instances delete "$INSTANCE_NAME" --zone="$ZONE"
 
 echo "Setup an instance."
 gcloud --project="$PROJECT" compute instances create "$INSTANCE_NAME" --zone="$ZONE" --metadata startup-script="sudo apt-get update && sudo apt-get install apache2 -y" --tags=http-server || exit
