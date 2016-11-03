@@ -39,7 +39,7 @@ echo "Run the failure.sh script in the bg"
 gcloud --project="$PROJECT" compute ssh --zone="$ZONE" "$INSTANCE_NAME" --command "sudo bash ~/failure.sh" &
 
 # Wait for IP to serve 200s
-until curl -I $IP > /dev/null 2> /dev/null
+until curl -I "$IP" > /dev/null 2> /dev/null
 do
   echo "Waiting for Apache to serve"
   sleep 2.
@@ -47,10 +47,10 @@ done
 echo "Apache is serving - INIT IS DONE"
 
 echo "Enabling failure simulation"
-gcloud --project="$PROJECT" compute project-info add-metadata --metadata failed_zone="$ZONE",failed_instance_names="$INSTANCE_NAME.*" || exit
+gcloud --project="$PROJECT" compute project-info add-metadata --metadata "failed_zone=${ZONE},failed_instance_names=${INSTANCE_NAME}.*" || exit
 
 # Wait for IP to top serving 200s
-while curl -I $IP > /dev/null 2> /dev/null
+while curl -I "$IP" > /dev/null 2> /dev/null
 do
   echo "Waiting for Apache to stop serving"
   sleep 2.
@@ -61,7 +61,7 @@ echo "Apache stoped serving - ENABLING FAILURE WAS SUCCESSFUL"
 echo "Reverting from failure simulation"
 gcloud --project="$PROJECT" compute project-info remove-metadata --keys failed_zone,failed_instance_names || exit
 
-until curl -I $IP > /dev/null 2> /dev/null
+until curl -I "$IP" > /dev/null 2> /dev/null
 do
   echo "Wating for apache to serve again"
   sleep 2.
