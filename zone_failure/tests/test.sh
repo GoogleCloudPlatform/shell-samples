@@ -45,10 +45,30 @@ IP=$(gcloud --project="$PROJECT" compute instances describe "$INSTANCE_NAME" --z
 echo "Got and IP: $IP"
 
 echo "Copy the failure.sh script to VM"
-gcloud --project="$PROJECT" compute copy-files --zone="$ZONE" ../failure.sh "$INSTANCE_NAME:~/failure.sh" || exit
+for i in  1 .. 10 ; do
+  gcloud --project="$PROJECT" compute copy-files --zone="$ZONE" ../failure.sh "$INSTANCE_NAME:~/failure.sh" && rc=$? || rc=$?
+  echo "Sleeping 30 seconds"
+  sleep 30
+  if [[ $rc == 0 ]] ; then
+    break
+  elif [[ $i != 10 ]] ; then
+    echo "Retrying"
+  fi
+done
 
 echo "Run the failure.sh script in the bg"
-gcloud --project="$PROJECT" compute ssh --zone="$ZONE" "$INSTANCE_NAME" --command "sudo bash ~/failure.sh" &
+for i in  1 .. 10 ; do
+  gcloud --project="$PROJECT" compute ssh --zone="$ZONE" "$INSTANCE_NAME" --command "sudo bash ~/failure.sh" &
+  ssh_pid=$!
+  echo "Sleeping 30 seconds"
+  sleep 30
+  # Check if the background process is still alive.
+  if kill -0 $ssh_pid ; then
+    break
+  elif [[ $i != 10 ]] ; then
+    echo "Retrying"
+  fi
+done
 
 # Wait for IP to serve 200s
 until curl -I "$IP" > /dev/null 2> /dev/null
