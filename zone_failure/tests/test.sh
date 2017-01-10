@@ -58,6 +58,8 @@ for i in  1 .. 10 ; do
     break
   elif [[ $i != 10 ]] ; then
     echo "Retrying"
+  else
+    exit 1
   fi
 done
 
@@ -73,6 +75,8 @@ for i in  1 .. 10 ; do
     break
   elif [[ $i != 10 ]] ; then
     echo "Retrying"
+  else
+    exit 1
   fi
 done
 
