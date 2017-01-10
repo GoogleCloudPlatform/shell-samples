@@ -34,6 +34,10 @@ if [[ -z ${ZONE} ]] ; then
   exit 1
 fi
 
+# Get this script's directory.
+# http://stackoverflow.com/a/246128/101923
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 echo "Cleanup after previous runs"
 gcloud --project="$PROJECT" compute project-info remove-metadata --keys failed_zone,failed_instance_names
 
@@ -46,7 +50,7 @@ echo "Got and IP: $IP"
 
 echo "Copy the failure.sh script to VM"
 for i in  1 .. 10 ; do
-  gcloud --project="$PROJECT" compute copy-files --zone="$ZONE" ../failure.sh "$INSTANCE_NAME:~/failure.sh" && rc=$? || rc=$?
+  gcloud --project="$PROJECT" compute copy-files --zone="$ZONE" "$DIR/../failure.sh" "$INSTANCE_NAME:~/failure.sh" && rc=$? || rc=$?
   echo "Sleeping 30 seconds"
   sleep 30
   if [[ $rc == 0 ]] ; then
