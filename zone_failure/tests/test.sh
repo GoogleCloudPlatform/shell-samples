@@ -54,6 +54,7 @@ for i in  1 .. 10 ; do
   echo "Sleeping 30 seconds"
   sleep 30
   if [[ $rc == 0 ]] ; then
+    echo "File copied"
     break
   elif [[ $i != 10 ]] ; then
     echo "Retrying"
@@ -68,6 +69,7 @@ for i in  1 .. 10 ; do
   sleep 30
   # Check if the background process is still alive.
   if kill -0 $ssh_pid ; then
+    echo "Script started"
     break
   elif [[ $i != 10 ]] ; then
     echo "Retrying"
