@@ -50,7 +50,7 @@ echo "Got and IP: $IP"
 
 echo "Copy the failure.sh script to VM"
 for i in  {1..10} ; do
-  gcloud --project="$PROJECT" compute copy-files --zone="$ZONE" "$DIR/../failure.sh" "$INSTANCE_NAME:~/failure.sh" && rc=$? || rc=$?
+  gcloud --project="$PROJECT" compute copy-files --zone="$ZONE" "$DIR/../failure.sh" "root@$INSTANCE_NAME:~/failure.sh" && rc=$? || rc=$?
   echo "Sleeping 30 seconds"
   sleep 30
   if [[ $rc == 0 ]] ; then
@@ -65,7 +65,7 @@ done
 
 echo "Run the failure.sh script in the bg"
 for i in  {1..10} ; do
-  gcloud --project="$PROJECT" compute ssh --zone="$ZONE" "$INSTANCE_NAME" --command "sudo bash ~/failure.sh" &
+  gcloud --project="$PROJECT" compute ssh --zone="$ZONE" "root@$INSTANCE_NAME" --command "sudo bash ~/failure.sh" &
   ssh_pid=$!
   echo "Sleeping 30 seconds"
   sleep 30
