@@ -17,10 +17,27 @@
 set -o nounset
 set -o errexit
 set -o pipefail
+set -x
 
-PROJECT="shell-samples"
-INSTANCE_NAME="failure-simulation"
-ZONE="us-central1-a"
+# Check that environment variables are set.
+if [[ -z ${PROJECT} ]] ; then
+  (>&2 echo "PROJECT environment variable must be set.")
+  exit 1
+fi
+
+if [[ -z ${INSTANCE_NAME} ]] ; then
+  (>&2 echo "INSTANCE_NAME environment variable must be set.")
+  exit 1
+fi
+
+if [[ -z ${ZONE} ]] ; then
+  (>&2 echo "ZONE environment variable must be set.")
+  exit 1
+fi
+
+# Get this script's directory.
+# http://stackoverflow.com/a/246128/101923
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 echo "Cleanup after previous runs"
 gcloud --project="$PROJECT" compute project-info remove-metadata --keys failed_zone,failed_instance_names
@@ -33,10 +50,36 @@ IP=$(gcloud --project="$PROJECT" compute instances describe "$INSTANCE_NAME" --z
 echo "Got and IP: $IP"
 
 echo "Copy the failure.sh script to VM"
-gcloud --project="$PROJECT" compute copy-files --zone="$ZONE" ../failure.sh "$INSTANCE_NAME:~/failure.sh" || exit
+for i in  {1..10} ; do
+  gcloud --project="$PROJECT" compute copy-files --zone="$ZONE" "$DIR/../failure.sh" "testuser@$INSTANCE_NAME:~/failure.sh" && rc=$? || rc=$?
+  echo "Sleeping 30 seconds"
+  sleep 30
+  if [[ $rc == 0 ]] ; then
+    echo "File copied"
+    break
+  elif [[ $i != 10 ]] ; then
+    echo "Retrying"
+  else
+    exit 1
+  fi
+done
 
 echo "Run the failure.sh script in the bg"
-gcloud --project="$PROJECT" compute ssh --zone="$ZONE" "$INSTANCE_NAME" --command "sudo bash ~/failure.sh" &
+for i in  {1..10} ; do
+  gcloud --project="$PROJECT" compute ssh --zone="$ZONE" "testuser@$INSTANCE_NAME" --command "sudo bash ~/failure.sh" &
+  ssh_pid=$!
+  echo "Sleeping 30 seconds"
+  sleep 30
+  # Check if the background process is still alive.
+  if kill -0 $ssh_pid ; then
+    echo "Script started"
+    break
+  elif [[ $i != 10 ]] ; then
+    echo "Retrying"
+  else
+    exit 1
+  fi
+done
 
 # Wait for IP to serve 200s
 until curl -I "$IP" > /dev/null 2> /dev/null
@@ -47,7 +90,7 @@ done
 echo "Apache is serving - INIT IS DONE"
 
 echo "Enabling failure simulation"
-gcloud --project="$PROJECT" compute project-info add-metadata --metadata "failed_zone=${ZONE},failed_instance_names=${INSTANCE_NAME}.*" || exit
+gcloud --project="$PROJECT" compute project-info add-metadata --metadata "failed_zone=${ZONE},failed_instance_names=${INSTANCE_NAME}" || exit
 
 # Wait for IP to top serving 200s
 while curl -I "$IP" > /dev/null 2> /dev/null
@@ -69,6 +112,3 @@ done
 echo "Apache is serving - RECOVERY WAS SUCCESSFUL"
 
 echo "TEST WAS SUCCESSFUL!!!"
-
-echo "deleting the instance"
-gcloud --project="$PROJECT" compute instances delete "$INSTANCE_NAME" --zone="$ZONE" -q
