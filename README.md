@@ -1,7 +1,6 @@
 ## Google Cloud Platform Shell Samples
 
-This repository holds Shell samples used documentation on [cloud.google.com](https://cloud.google
-.com).
+This repository holds Shell samples used documentation on [cloud.google.com](https://cloud.google.com).
 
 For more detailed introduction to a product, check the README.md in the
 corresponding folder.
