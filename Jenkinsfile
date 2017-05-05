@@ -6,12 +6,15 @@ pipeline {
     
   }
   stages {
+    stage('Setup') {
+      withCredentials([file(credentialsId: credentialsId, variable: 'SERVICE_ACCOUNT')]) {
+        sh 'gcloud auth activate-service-account --key-file="$SERVICE_ACCOUNT"'
+        sh "gcloud config set project ${PROJECT}"
+      }
+    }
     stage('zone_failure') {
       steps {
-        sh '''gcloud config set project $PROJECT
-gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-
-./zone_failure/tests/test.sh'''
+        sh './zone_failure/tests/test.sh'
       }
     }
   }
