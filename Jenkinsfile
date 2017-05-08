@@ -41,6 +41,11 @@ pipeline {
       }
     }
   }
+  post {
+    always {
+      sh './zone_failure/tests/post_build.sh'
+    }
+  }
   environment {
     PROJECT = 'shell-samples'
     INSTANCE_NAME = 'failure-simulation'
