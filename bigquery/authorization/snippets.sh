@@ -22,7 +22,7 @@ if [[ -z "$PROJECT_ID" ]] ; then
 fi
 
 # [START get_token]
-ACCESS_TOKEN="$(gcloud auth print-access-token)"
+ACCESS_TOKEN="$(gcloud auth application-default print-access-token)"
 # [END get_token]
 
 # [START auth_header]
