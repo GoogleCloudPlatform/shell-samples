@@ -1,0 +1,23 @@
+{
+  "sourceFormat": "BIGTABLE",
+  "sourceUris": [
+    "https://googleapis.com/bigtable/projects/[PROJECT_ID]/instances/[INSTANCE_ID]/tables/[TABLE_ID]"
+  ],
+  "bigtableOptions": {
+    "readRowkeyAsString": true,
+    "columnFamilies" : [
+      {
+        "familyId": "cf1",
+        "columns": [
+          {
+            "qualifierString": "count",
+            "fieldName": "usage_count",
+            "type": "INTEGER",
+            "encoding": "BINARY",
+            "onlyReadLatest": true
+          }
+        ]
+      }
+    ]
+  }
+}
