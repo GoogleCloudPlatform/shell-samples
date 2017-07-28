@@ -15,17 +15,17 @@
 
 set -e
 
-PROJECT_ID="$1"
-if [[ -z "$PROJECT_ID" ]] ; then
+GOOGLE_CLOUD_PROJECT="$1"
+if [[ -z "$GOOGLE_CLOUD_PROJECT" ]] ; then
   echo "Usage: $0 project-id"
   exit 1
 fi
 
 # [START get_token]
-ACCESS_TOKEN="$(gcloud auth print-access-token)"
+ACCESS_TOKEN="$(gcloud auth application-default print-access-token)"
 # [END get_token]
 
 # [START auth_header]
 curl -H "Authorization: Bearer $ACCESS_TOKEN" \
-  "https://www.googleapis.com/bigquery/v2/projects/$PROJECT_ID/datasets"
+  "https://www.googleapis.com/bigquery/v2/projects/$GOOGLE_CLOUD_PROJECT/datasets"
 # [END auth_header]

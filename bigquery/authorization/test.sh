@@ -16,8 +16,8 @@
 set -e
 
 # Check that environment variables are set.
-if [[ -z ${PROJECT} ]] ; then
-  (>&2 echo "PROJECT environment variable must be set.")
+if [[ -z ${GOOGLE_CLOUD_PROJECT} ]] ; then
+  (>&2 echo "GOOGLE_CLOUD_PROJECT environment variable must be set.")
   exit 1
 fi
 
@@ -25,7 +25,7 @@ fi
 # http://stackoverflow.com/a/246128/101923
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-OUTPUT="$( "$DIR"/snippets.sh "$PROJECT" )"
+OUTPUT="$( "$DIR"/snippets.sh "$GOOGLE_CLOUD_PROJECT" )"
 
 # Check for an expected dataset name.
 if [[ "$OUTPUT" != *"shell_samples_test_dataset"* ]] ; then
